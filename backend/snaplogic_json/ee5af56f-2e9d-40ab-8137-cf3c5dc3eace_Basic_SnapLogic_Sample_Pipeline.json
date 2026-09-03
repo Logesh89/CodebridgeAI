@@ -1,0 +1,58 @@
+{
+  "class": "com.snaplogic.sdi.Pipeline",
+  "property_map": {
+    "info": {
+      "label": "Basic_Sample_Pipeline",
+      "notes": "Sample SnapLogic pipeline structure for learning."
+    }
+  },
+  "nodes": [
+    {
+      "name": "JSON Generator",
+      "type": "json_generator",
+      "settings": {
+        "documents": [
+          {
+            "id": 1,
+            "name": "Alice"
+          },
+          {
+            "id": 2,
+            "name": "Bob"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Mapper",
+      "type": "mapper",
+      "settings": {
+        "mappings": [
+          {
+            "source": "$id",
+            "target": "employee_id"
+          },
+          {
+            "source": "$name",
+            "target": "employee_name"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JSON Formatter",
+      "type": "json_formatter",
+      "settings": {}
+    }
+  ],
+  "links": [
+    {
+      "from": "JSON Generator",
+      "to": "Mapper"
+    },
+    {
+      "from": "Mapper",
+      "to": "JSON Formatter"
+    }
+  ]
+}

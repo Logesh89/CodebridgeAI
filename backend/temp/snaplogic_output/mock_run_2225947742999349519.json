@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "name": "Pipeline Sample Row 1",
+    "status": "processed"
+  },
+  {
+    "id": 2,
+    "name": "Pipeline Sample Row 2",
+    "status": "processed"
+  }
+]

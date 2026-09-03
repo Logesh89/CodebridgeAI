@@ -1,0 +1,12 @@
+[general]
+service = snaplogic-platform
+env = development
+
+[trace]
+enabled = true
+
+[logs]
+enabled = true
+
+[apm]
+enabled = true

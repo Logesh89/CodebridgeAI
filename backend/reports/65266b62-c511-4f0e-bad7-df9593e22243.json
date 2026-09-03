@@ -1,0 +1,20 @@
+{
+  "pipeline_name": "Basic_SnapLogic_Sample_Pipeline",
+  "pipeline_id": "5215c2b4-a535-43a0-b2cb-8b7bdf272a62",
+  "status": "failed",
+  "checks": {
+    "row_count": true,
+    "column_count": false,
+    "column_names": false,
+    "column_order": false,
+    "data_types": false,
+    "values": false,
+    "null_count": "True",
+    "duplicate_count": "True",
+    "checksum": false
+  },
+  "differences": {
+    "structure_mismatch": true
+  },
+  "timestamp": "2026-09-02T14:17:58.265092+00:00"
+}

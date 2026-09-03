@@ -1,0 +1,155 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: snaplogic-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-snaplogic_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-snaplogic_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-snaplogic_platform}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-snaplogic_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: snaplogic-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+    container_name: snaplogic-backend
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+      - ./snaplogic_json:/app/snaplogic_json
+      - ./generated:/app/generated
+      - ./completed:/app/completed
+      - ./failed:/app/failed
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+      - ./temp:/app/temp
+      - ./downloads:/app/downloads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/Dockerfile.frontend
+    container_name: snaplogic-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+
+  airflow-webserver:
+    build:
+      context: ./airflow
+      dockerfile: ../docker/Dockerfile.airflow
+    container_name: snaplogic-airflow-webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-snaplogic_user}:${POSTGRES_PASSWORD:-snaplogic_pass}@postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-change-me-fernet-key-32bytes!!}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/plugins:/opt/airflow/plugins
+      - ./uploads:/opt/airflow/uploads
+      - ./snaplogic_json:/opt/airflow/snaplogic_json
+      - ./generated:/opt/airflow/generated
+      - ./completed:/opt/airflow/completed
+      - ./failed:/opt/airflow/failed
+      - ./logs:/opt/airflow/logs
+      - ./reports:/opt/airflow/reports
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  airflow-scheduler:
+    build:
+      context: ./airflow
+      dockerfile: ../docker/Dockerfile.airflow
+    container_name: snaplogic-airflow-scheduler
+    command: scheduler
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-snaplogic_user}:${POSTGRES_PASSWORD:-snaplogic_pass}@postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:-change-me-fernet-key-32bytes!!}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/plugins:/opt/airflow/plugins
+      - ./uploads:/opt/airflow/uploads
+      - ./snaplogic_json:/opt/airflow/snaplogic_json
+      - ./generated:/opt/airflow/generated
+      - ./completed:/opt/airflow/completed
+      - ./failed:/opt/airflow/failed
+      - ./logs:/opt/airflow/logs
+      - ./reports:/opt/airflow/reports
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    container_name: snaplogic-datadog
+    environment:
+      DD_API_KEY: ${DD_API_KEY:-}
+      DD_SITE: ${DD_SITE:-datadoghq.com}
+      DD_APM_ENABLED: "true"
+      DD_LOGS_ENABLED: "true"
+      DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: "true"
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    ports:
+      - "8126:8126"
+      - "8125:8125/udp"
+
+volumes:
+  postgres_data:

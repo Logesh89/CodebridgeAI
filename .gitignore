@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+*.db
+*.sqlite
+*.sqlite3
+
+# Node
+node_modules/
+dist/
+*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Storage
+uploads/*
+!uploads/.gitkeep
+snaplogic_json/*
+!snaplogic_json/.gitkeep
+generated/*
+!generated/.gitkeep
+completed/*
+!completed/.gitkeep
+failed/*
+!failed/.gitkeep
+logs/*
+!logs/.gitkeep
+reports/*
+!reports/.gitkeep
+temp/*
+!temp/.gitkeep
+downloads/*
+!downloads/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log

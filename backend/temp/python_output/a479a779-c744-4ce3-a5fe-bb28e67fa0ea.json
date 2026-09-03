@@ -1,0 +1,17 @@
+Step 1 : JSON Generator
+[{'id': 1, 'name': 'Alice'}, {'id': 2, 'name': 'Bob'}]
+
+Step 2 : Mapper
+[{'employee_id': 1, 'employee_name': 'Alice'}, {'employee_id': 2, 'employee_name': 'Bob'}]
+
+Step 3 : JSON Formatter
+[
+    {
+        "employee_id": 1,
+        "employee_name": "Alice"
+    },
+    {
+        "employee_id": 2,
+        "employee_name": "Bob"
+    }
+]
