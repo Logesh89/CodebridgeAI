@@ -4,14 +4,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, CircularProgress,
   Button, Tabs, Tab, Table, TableBody, TableCell, TableHead, TableRow, Paper, Alert, Stack,
-  Accordion, AccordionSummary, AccordionDetails, Tooltip,
+  Accordion, AccordionSummary, AccordionDetails,
 } from '@mui/material';
 import {
   PlayArrow, Transform, ArrowBack, Code, Compare, Assessment, BugReport,
-  ExpandMore, Monitor, ArrowForward, CheckCircle, Error as ErrorIcon,
+  ExpandMore, Monitor, ArrowForward,
 } from '@mui/icons-material';
 import { pipelineApi } from '../services/api';
-import { formatDate } from '../utils/formatters';
 
 const statusColors: Record<string, 'default' | 'primary' | 'success' | 'error' | 'warning' | 'info'> = {
   pending: 'default', queued: 'info', running: 'primary', converting: 'warning',

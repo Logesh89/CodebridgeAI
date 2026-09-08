@@ -1,0 +1,123 @@
+=== LEFT TERMINAL (SOURCE STDOUT) ===
+-- IICS Source Mapping Pipeline Execution Stream --
+
+[Step 1: Source (Source)] Input Data Loaded:
+  employee_id = 101
+  salary = 50000
+  bonus = 5000
+
+[Step 2: Filter (Filter)] Evaluated Filter Condition:
+  Condition (salary <= 2000): FILTERED OUT (Record dropped)
+
+[Step 3: Transformation (Expression)] Evaluated Logic:
+  total_salary = 55000
+
+[Step 4: Target (Target)] Final Evaluated Data Stream:
+  employee_id = 101
+  salary = 50000
+  bonus = 5000
+  total_salary = 55000
+  [Stream Note]: Condition (salary <= 2000): FILTERED OUT (Record dropped)
+
+[IICS Mapping Execution Completed Successfully - 0 Errors]
+
+=== RIGHT TERMINAL (TARGET STDOUT) ===
+-- Pentaho KTR Transformation Execution Stream --
+
+[Step 1: Source (TableInput)] Input Stream Loaded:
+  employee_id = 101
+  salary = 50000
+  bonus = 5000
+
+[Step 2: Filter (FilterRows)] Executing Filter Rows:
+  Condition (salary <= 2000): FILTERED OUT (Record dropped)
+
+[Step 3: Transformation (ScriptValueMod)] Executing Transformation Logic:
+  total_salary = 55000
+
+[Step 4: Target (TableOutput)] Final Transformed Output Stream:
+  employee_id = 101
+  salary = 50000
+  bonus = 5000
+  total_salary = 55000
+  [Stream Note]: Condition (salary <= 2000): FILTERED OUT (Record dropped)
+
+[Pentaho KTR Transformation Execution Completed Successfully - 0 Errors]
+
+=== GENERATED KTR XML ===
+<?xml version="1.0" encoding="UTF-8"?>
+<transformation>
+  <info>
+    <name>Employee_Filter_Calculation</name>
+    <description>Converted dynamically from IICS Mapping JSON</description>
+    <extended_description>Converted dynamically via CodeBridge AI IICS Engine</extended_description>
+    <trans_version>1.0</trans_version>
+    <trans_type>Normal</trans_type>
+    <directory>/</directory>
+  </info>
+  <step>
+    <name>Source</name>
+    <type>TableInput</type>
+    <sql>SELECT employee_id, salary, bonus FROM source_employee_filter_calculation;</sql>
+    <limit>0</limit>
+  </step>
+  <step>
+    <name>Filter</name>
+    <type>FilterRows</type>
+    <compare>
+      <condition>
+        <negated>N</negated>
+        <leftvalue>salary</leftvalue>
+        <function>&lt;=</function>
+        <rightvalue>2000</rightvalue>
+      </condition>
+    </compare>
+  </step>
+  <step>
+    <name>Transformation</name>
+    <type>ScriptValueMod</type>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>
+      <jsScript>
+        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>var total_salary = salary + bonus;</jsScript_script>
+      </jsScript>
+    </jsScripts>
+    <fields>
+      <field>
+        <name>total_salary</name>
+        <rename>total_salary</rename>
+        <type>Number</type>
+        <length>255</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>
+    </fields>
+  </step>
+  <step>
+    <name>Target</name>
+    <type>TableOutput</type>
+    <table>dw_employee_filter_calculation</table>
+    <commit>1000</commit>
+    <truncate>N</truncate>
+  </step>
+  <order>
+    <hop>
+      <from>Source</from>
+      <to>Filter</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Filter</from>
+      <to>Transformation</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Transformation</from>
+      <to>Target</to>
+      <enabled>Y</enabled>
+    </hop>
+  </order>
+</transformation>

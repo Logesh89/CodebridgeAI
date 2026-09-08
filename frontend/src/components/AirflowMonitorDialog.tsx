@@ -1,8 +1,8 @@
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box,
-  Chip, Grid, Card, CardContent, Divider, Table, TableBody, TableCell, TableHead, TableRow
+  Chip, Grid, Card, CardContent, Table, TableBody, TableCell, TableHead, TableRow
 } from '@mui/material';
-import { OpenInNew, CheckCircle, Speed, AccountTree, Refresh } from '@mui/icons-material';
+import { OpenInNew, CheckCircle, AccountTree } from '@mui/icons-material';
 
 interface AirflowMonitorProps {
   open: boolean;

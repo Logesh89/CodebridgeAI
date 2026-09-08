@@ -2,7 +2,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box,
   Chip, Grid, Card, CardContent, Table, TableBody, TableCell, TableHead, TableRow
 } from '@mui/material';
-import { OpenInNew, CheckCircle, Analytics, Equalizer } from '@mui/icons-material';
+import { OpenInNew, CheckCircle, Analytics } from '@mui/icons-material';
 
 interface DatadogMonitorProps {
   open: boolean;

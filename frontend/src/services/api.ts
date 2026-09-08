@@ -120,8 +120,10 @@ export const downloadApi = {
 export const interpreterApi = {
   convertCode: (data: { source_code: string; from_lang: string; to_lang: string; file_name?: string }) =>
     api.post('/interpreter/convert', data),
-  executeCode: (data: { code: string; language: string }) =>
+  executeCode: (data: { code: string; language: string; input_data?: string }) =>
     api.post('/interpreter/execute', data),
-  autoFixCode: (data: { code: string; language: string; error_message?: string }) =>
+  autoFixCode: (data: { code: string; language: string; source_code?: string; error_message?: string }) =>
     api.post('/interpreter/auto-fix', data),
+  convertIicsToKtr: (data: { iics_json: string }) =>
+    api.post('/interpreter/iics-to-ktr', data),
 };

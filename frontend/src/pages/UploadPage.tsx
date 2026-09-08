@@ -3,10 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Card, CardContent, Typography, Button, Alert, Chip, CircularProgress,
-  Stack, Tabs, Tab, TextField, InputAdornment, Snackbar, SnackbarContent, Grid,
+  Tabs, Tab, TextField, InputAdornment, Snackbar, Grid,
 } from '@mui/material';
 import {
-  CloudUpload, CheckCircle, Error as ErrorIcon, Download, Folder, Code, Storage, PlayArrow,
+  CloudUpload, Download, Folder, Code, Storage, PlayArrow,
 } from '@mui/icons-material';
 import { excelApi, pipelineApi } from '../services/api';
 

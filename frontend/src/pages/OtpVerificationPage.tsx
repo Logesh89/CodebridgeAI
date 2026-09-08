@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import {
   Box, Card, CardContent, TextField, Button, Typography,
-  Alert, CircularProgress, Chip, Stack
+  Alert, CircularProgress
 } from '@mui/material';
-import { Pin, ContentCopy, Key } from '@mui/icons-material';
+import { Pin, Key } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
 interface OtpForm {

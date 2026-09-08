@@ -7,7 +7,7 @@ import {
   Dialog, DialogContent, List, ListItemButton,
   ListItemAvatar, Avatar, ListItemText, IconButton, Stack
 } from '@mui/material';
-import { Email, Google, AccountCircle, Close, Add } from '@mui/icons-material';
+import { Email, Google, Close } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LoginForm {
