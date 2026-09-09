@@ -65,11 +65,12 @@ async def app_exception_handler(request, exc: AppException):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    allow_origin_regex=r".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(api_router, prefix=settings.api_v1_prefix)
 
