@@ -21,12 +21,12 @@ export default function DownloadsPage() {
 
   const { data: pipelines, isLoading: isLoadingPipelines } = useQuery({
     queryKey: ['pipelines'],
-    queryFn: () => pipelineApi.list().then((r) => r.data).catch(() => []),
+    queryFn: () => pipelineApi.list().then((r) => r.data),
   });
 
   const { data: reports, isLoading: isLoadingReports } = useQuery({
     queryKey: ['reports'],
-    queryFn: () => reportsApi.list().then((r) => r.data).catch(() => []),
+    queryFn: () => reportsApi.list().then((r) => r.data),
   });
 
   if (isLoadingPipelines || isLoadingReports) {
@@ -35,10 +35,7 @@ export default function DownloadsPage() {
 
   const items: DownloadableItem[] = [];
 
-  const pipelineList = Array.isArray(pipelines) ? pipelines : (Array.isArray((pipelines as any)?.items) ? (pipelines as any).items : []);
-  const reportList = Array.isArray(reports) ? reports : (Array.isArray((reports as any)?.items) ? (reports as any).items : []);
-
-  pipelineList.forEach((p: { id: string; name: string; python_file_path?: string; status: string; updated_at: string }) => {
+  (pipelines || []).forEach((p: { id: string; name: string; python_file_path?: string; status: string; updated_at: string }) => {
     if (p.python_file_path) {
       items.push({
         id: p.id,
@@ -51,7 +48,7 @@ export default function DownloadsPage() {
     }
   });
 
-  reportList.forEach((r: { id: string; pipeline_id: string; status: string; created_at: string }) => {
+  (reports || []).forEach((r: { id: string; pipeline_id: string; status: string; created_at: string }) => {
     items.push({
       id: r.id,
       name: `validation_report_${r.id.slice(0, 8)}.html`,
@@ -103,32 +100,46 @@ export default function DownloadsPage() {
             </TableHead>
             <TableBody>
               {filteredItems.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell sx={{ fontWeight: 600 }}>{item.name}</TableCell>
+                <TableRow key={`${item.type}-${item.id}`} hover>
+                  <TableCell>
+                    <Box display="flex" alignItems="center" gap={1.5}>
+                      {item.type === 'python' ? (
+                        <Code color="primary" />
+                      ) : (
+                        <Description color="secondary" />
+                      )}
+                      <Typography fontWeight={600}>{item.name}</Typography>
+                    </Box>
+                  </TableCell>
                   <TableCell>
                     <Chip
-                      icon={item.type === 'python' ? <Code /> : <Description />}
                       label={item.type.toUpperCase()}
                       size="small"
                       color={item.type === 'python' ? 'primary' : 'secondary'}
+                      variant="outlined"
                     />
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={item.category.toUpperCase()}
+                      label={item.category}
                       size="small"
-                      variant="outlined"
-                      color={item.category === 'completed' ? 'success' : item.category === 'failed' ? 'error' : 'default'}
+                      color={
+                        item.category === 'completed'
+                          ? 'success'
+                          : item.category === 'failed'
+                          ? 'error'
+                          : 'info'
+                      }
                     />
                   </TableCell>
-                  <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(item.date).toLocaleString()}</TableCell>
                   <TableCell align="right">
                     <Button
                       variant="outlined"
                       size="small"
                       startIcon={<Download />}
                       href={item.downloadUrl}
-                      download
+                      target="_blank"
                     >
                       Download
                     </Button>

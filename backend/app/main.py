@@ -1,7 +1,6 @@
 """FastAPI application entry point."""
 
 import logging
-import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -10,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
-from app.core.database import Base, get_engine
+from app.core.database import Base, engine
 from app.core.logging_config import setup_logging
 from app.core.exceptions import AppException
 from app.middleware.exception_handler import ExceptionHandlerMiddleware
@@ -23,9 +22,6 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
-    is_vercel = os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
-    base_dir = "/tmp" if is_vercel else "."
-
     for directory in [
         settings.upload_dir,
         settings.snaplogic_json_dir,
@@ -37,18 +33,10 @@ async def lifespan(app: FastAPI):
         settings.temp_dir,
         settings.downloads_dir,
     ]:
-        try:
-            target_path = Path(base_dir) / directory if is_vercel else Path(directory)
-            target_path.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            logger.warning("Could not create directory %s: %s", directory, e)
+        Path(directory).mkdir(parents=True, exist_ok=True)
 
-    try:
-        engine = get_engine()
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-    except Exception as e:
-        logger.error("Error creating database tables: %s", e)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     logger.info("Application started: %s", settings.app_name)
     yield
@@ -77,7 +65,7 @@ async def app_exception_handler(request, exc: AppException):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -90,7 +78,6 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 async def health_check():
     db_status = "healthy"
     try:
-        engine = get_engine()
         async with engine.connect() as conn:
             await conn.execute(__import__("sqlalchemy").text("SELECT 1"))
     except Exception:
