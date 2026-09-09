@@ -74,6 +74,18 @@ app.add_middleware(
 app.include_router(api_router, prefix=settings.api_v1_prefix)
 
 
+@app.get("/", tags=["Root"])
+async def root():
+    return {
+        "status": "online",
+        "message": "CodeBridge AI Platform Backend API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/health",
+        "api_v1": settings.api_v1_prefix,
+    }
+
+
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
 async def health_check():
     db_status = "healthy"
@@ -89,3 +101,4 @@ async def health_check():
         database=db_status,
         redis="not_configured",
     )
+

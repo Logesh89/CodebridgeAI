@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     otp_expire_minutes: int = 10
     otp_length: int = 6
     rate_limit_per_minute: int = 100
-    cors_origins: str = "http://localhost:5173,http://localhost:3000"
+    cors_origins: str = "http://localhost:5173,http://localhost:3000,*"
 
     # AI Service
     openai_api_key: str = ""
