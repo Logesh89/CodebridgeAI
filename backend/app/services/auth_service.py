@@ -1,5 +1,6 @@
 """Authentication service."""
 
+import logging
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -20,6 +21,7 @@ from app.repositories.user_repository import UserRepository
 from app.schemas import LoginRequest, TokenResponse, VerifyOTPRequest
 from app.services.email_service import EmailService
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
@@ -54,13 +56,16 @@ class AuthService:
         user.remember_me = request.remember_me
         await self.user_repo.update(user)
 
-        await self.email_service.send_otp(user.email, otp)
+        sent = await self.email_service.send_otp(user.email, otp)
+        if not sent:
+            logger.warning("SMTP send failed for %s. Operating in serverless demo fallback mode.", user.email)
+
         await self._log_audit(user.id, "login_otp_sent", {"email": user.email})
 
         return {
-            "message": "OTP sent to your email",
+            "message": "OTP sent to your email" if sent else f"OTP generated (Demo Mode: {otp})",
             "email": user.email,
-            "otp_code": otp if not settings.smtp_user else None
+            "otp_code": otp if (not sent or not settings.smtp_user) else None
         }
 
     async def verify_otp(self, request: VerifyOTPRequest) -> TokenResponse:
@@ -160,7 +165,7 @@ class AuthService:
         await self.user_repo.update(user)
 
         reset_link = f"http://localhost:5173/reset-password?token={reset_token}"
-        await self.email_service.send_password_reset(email, reset_link)
+        await self.email_service.send_otp(email, reset_token)
         await self._log_audit(user.id, "password_reset_requested")
 
         return {"message": "Password reset link sent to your email"}

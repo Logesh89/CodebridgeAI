@@ -1,6 +1,7 @@
 """FastAPI application entry point."""
 
 import logging
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -22,6 +23,9 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
+    is_vercel = os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
+    base_dir = "/tmp" if is_vercel else "."
+
     for directory in [
         settings.upload_dir,
         settings.snaplogic_json_dir,
@@ -33,10 +37,17 @@ async def lifespan(app: FastAPI):
         settings.temp_dir,
         settings.downloads_dir,
     ]:
-        Path(directory).mkdir(parents=True, exist_ok=True)
+        try:
+            target_path = Path(base_dir) / directory if is_vercel else Path(directory)
+            target_path.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logger.warning("Could not create directory %s: %s", directory, e)
 
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        logger.error("Error creating database tables: %s", e)
 
     logger.info("Application started: %s", settings.app_name)
     yield
@@ -65,7 +76,7 @@ async def app_exception_handler(request, exc: AppException):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

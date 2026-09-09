@@ -1,0 +1,47 @@
+# Python virtual environments & cache
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Node dependencies & local builds
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+
+# Git & Editor files
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+snaplogic_platform.db
+
+# Temporary & storage directories
+uploads/
+downloads/
+temp/
+tmp/
+logs/
+reports/
+generated/
+completed/
+failed/
+snaplogic_json/
+datadog/
+airflow/
+
+# OS & Vercel cache
+.DS_Store
+Thumbs.db
+.vercel
