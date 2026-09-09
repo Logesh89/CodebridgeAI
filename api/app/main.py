@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
-from app.core.database import Base, get_engine
+from app.core.database import Base, engine
 from app.core.logging_config import setup_logging
 from app.core.exceptions import AppException
 from app.middleware.exception_handler import ExceptionHandlerMiddleware
@@ -44,7 +44,6 @@ async def lifespan(app: FastAPI):
             logger.warning("Could not create directory %s: %s", directory, e)
 
     try:
-        engine = get_engine()
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
     except Exception as e:
@@ -90,7 +89,6 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 async def health_check():
     db_status = "healthy"
     try:
-        engine = get_engine()
         async with engine.connect() as conn:
             await conn.execute(__import__("sqlalchemy").text("SELECT 1"))
     except Exception:
