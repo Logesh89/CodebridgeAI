@@ -39,11 +39,15 @@ export default function MainLayout() {
 
   const { data: notifications } = useQuery({
     queryKey: ['notifications'],
-    queryFn: () => notificationsApi.list().then((r) => r.data),
-    refetchInterval: 5000,
+    queryFn: () => notificationsApi.list().then((r) => r.data).catch(() => []),
+    refetchInterval: 10000,
   });
 
-  const unreadCount = (notifications || []).filter((n: { is_read: boolean }) => !n.is_read).length;
+  const notificationsList = Array.isArray(notifications)
+    ? notifications
+    : (Array.isArray((notifications as any)?.items) ? (notifications as any).items : []);
+
+  const unreadCount = notificationsList.filter((n: { is_read?: boolean }) => !n.is_read).length;
   const isAdmin = user?.role?.toLowerCase() === 'admin';
   const visibleMenuItems = menuItems.filter((item) => item.path !== '/admin' || isAdmin);
 
@@ -99,45 +103,30 @@ export default function MainLayout() {
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar>
-          <IconButton color="inherit" edge="start" onClick={() => setMobileOpen(!mobileOpen)} sx={{ mr: 2, display: { sm: 'none' } }}>
+          <IconButton
+            color="inherit"
+            edge="start"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            sx={{ mr: 2, display: { sm: 'none' } }}
+          >
             <MenuIcon />
           </IconButton>
-
-          {/* Top Bar Branding: ITC Infotech Logo + CodeBridge AI */}
-          <Box display="flex" alignItems="center" gap={1.5} sx={{ flexGrow: 1 }}>
-            <Box
-              component="img"
-              src="/itc_infotech_logo.png"
-              alt="ITC Infotech Logo"
-              sx={{
-                height: 38,
-                bgcolor: '#ffffff',
-                px: 1,
-                py: 0.4,
-                borderRadius: 1.5,
-                boxShadow: 1,
-                objectFit: 'contain',
-              }}
-            />
-            <Typography variant="h5" fontWeight={800} sx={{ letterSpacing: 0.5, color: '#ffffff' }}>
-              CodeBridge AI
-            </Typography>
-          </Box>
-
+          <Box sx={{ flexGrow: 1 }} />
           <IconButton color="inherit" onClick={toggleTheme}>
             {darkMode ? <Brightness7 /> : <Brightness4 />}
           </IconButton>
           <IconButton color="inherit" onClick={() => navigate('/notifications')}>
-            <Badge badgeContent={unreadCount} color="error"><Notifications /></Badge>
+            <Badge badgeContent={unreadCount} color="error">
+              <Notifications />
+            </Badge>
           </IconButton>
-          <IconButton color="inherit" onClick={() => navigate('/profile')}>
-            <Avatar sx={{ width: 34, height: 34, bgcolor: 'secondary.main', fontWeight: 700 }}>
-              {user?.full_name ? user.full_name[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : 'U'}
+          <IconButton onClick={() => navigate('/profile')} sx={{ ml: 1 }}>
+            <Avatar sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
+              {user?.email?.charAt(0).toUpperCase() || 'U'}
             </Avatar>
           </IconButton>
         </Toolbar>
       </AppBar>
-
       <Box component="nav" sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}>
         <Drawer
           variant="temporary"
@@ -150,14 +139,23 @@ export default function MainLayout() {
         </Drawer>
         <Drawer
           variant="permanent"
-          sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' } }}
+          sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': { width: DRAWER_WIDTH } }}
           open
         >
           {drawer}
         </Drawer>
       </Box>
-
-      <Box component="main" sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` }, mt: 8 }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
+          mt: 8,
+          minHeight: '100vh',
+          bgcolor: 'background.default',
+        }}
+      >
         <Outlet />
       </Box>
     </Box>
